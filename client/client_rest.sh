@@ -19,6 +19,11 @@ else
 	exit 1
 fi
 
+count="`curl -X GET $hostname/`"
+
+
+echo
+
 while :
 do 
 	echo "1) Add User"
@@ -31,36 +36,38 @@ do
 	read pause
 	case "$var" in
         	1)
-            		echo "Adding User..."
-			echo "Username:"
-			read username
-			echo "id:"
-			read id
-			curl -d "id=$id&username=$username" -X POST $hostname/set_new_user
+            	echo "Adding User..."
+			    echo "Username:"
+			    read username
+			    let count=$count+1
+			    curl -d "id=$count&username=$username" -X POST $hostname/set_new_user
            		;;
          
        		2)
-			echo "Printing User..."
-            		;;
+       		    echo "Username:"
+		        read username
+		        result="`curl -d "user=$username" -X GET $hostname/get_user`"
+			    echo
+			    echo -E  "ID	USERNAME"
+			    echo $result | sed "s/\[//g" | sed "s/\]//g" | tr , '\n' | sed "s/^ //g"
+            	;;
          
         	3)
-            		echo "Deleting User..."
-            		;;
+            	echo "Deleting User..."
+            	;;
         	4)
-			result="`curl -X GET $hostname/get_users`"
-			echo -E  "\nID	USERNAME"
-			echo $result | sed "s/\[//g" | sed "s/\]//g" | sed "s/, /\n/g" | sed "s/User(//g" | sed "s/'//g" | sed "s/)//g" | awk -F, '{print $1,$2}'
-			echo ""
+			    result="`curl -X GET $hostname/get_users`"
+			    echo
+			    echo -E  "ID	USERNAME"
+			    echo $result | sed "s/\[//g" | sed "s/\]//g" | tr , '\n' | sed "s/^ //g"
+			    echo ""
             		;;
         	5)
-            		echo "Deleting all users..."
-			curl -X POST 18.218.8.145/del
-            		;;
-         
-        	*)
+            	echo "Deleting all users..."
+			    curl -X POST $hostname/del
+            	;;
+           	*)
 			echo "exit"
 			exit 1
-            exit 1
- 
-esac
+    esac
 done 
